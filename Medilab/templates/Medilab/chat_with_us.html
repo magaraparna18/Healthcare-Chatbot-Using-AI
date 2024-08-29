@@ -1,0 +1,335 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>CHAT WITH AI</title>
+    <link rel="stylesheet" href="{% static 'Medilab/css/chat.css' %}"/>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0"/>
+    {#    <script src=""></script>#}
+</head>
+<body>
+<div style="position: fixed; top: 0; right: 0; width: 100%; text-align: center; background-color: #c6dbfa; padding: 10px 0; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);">
+    <h1>Welcome to AI Chat Room!</h1>
+    <div id="google_translate_element"></div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+}
+</script>
+
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</div>
+<div class="container" >
+    {% csrf_token %}
+    <div>
+        <button class="chatbot-toggler">
+            <span class="material-symbols-outlined">mode_comment</span>
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <div class="chatbot">
+            <header>
+                <h2>CHAT WITH AI </h2>
+                <span class="close-btn material-symbols-outlined">close</span>
+            </header>
+            <ul class="chatbox "  id="chatbox">
+                <li class="chat incoming">
+                    <span class="material-symbols-outlined">smart_toy</span>
+                    <p>Hi there ! <br> I'm AI, your dedicated virtual health assistant. Whether you have a question,
+                        need to monitor your health, or require guidance, I'm here to help you every step of the way.
+                    </p>
+                </li>
+                <br>
+                <li class="chat outgoing">
+                    <p>Hi AI! It's great to meet you. I'm glad to have a dedicated virtual health assistant to assist
+                        me with my healthcare needs.</p>
+                    <span class="material-symbols-outlined">face</span>
+                </li>
+            </ul>
+            <div class="chat-input">
+                <textarea placeholder="Enter a message...." required id="text_context"></textarea>
+                <span id="refresh-btn" class="material-symbols-outlined" onclick="refreshChat()">refresh</span>
+                <span id="send-btn" class="material-symbols-outlined" onclick="send_message()">send</span>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+<script src="{% static 'Medilab/js/chat.js' %}"></script>
+
+
+<script>
+    let flag = 0;
+    $(document).ready(function () {
+        let temp = "";
+        if (flag === 1) {
+            setInterval(function () {
+                $.ajax({
+                    type: 'GET',
+                    url: "getMessages",
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    success: function (response) {
+                        console.log(response.messages);
+                        $("#chatbox").empty();
+                        for (var key in response.messages) {
+                            let message = response.messages[key][0];
+                            let chat_type = response.messages[key][1];
+                            let date_time = response.messages[key][2];
+                            console.log(message);
+                            console.log(chat_type);
+                            console.log(date_time);
+                            if (chat_type === 'bot') {
+                                temp = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>" + message + "</p> </li><br>";
+                            } else {
+                                temp = "<li class='chat outgoing' style='margin-left: 73%'> <p>" + message + "</p> <span class='material-symbols-outlined'>face</span> </li><br>";
+                            }
+                            //console.log(temp);
+                            $("#chatbox").append(temp);
+                        }
+                    },
+                    error: function (response) {
+                        console.log('An error occured')
+                    }
+                });
+            }, 1000);
+        } else {
+            $("#chatbox").empty();
+            sending();
+        }
+    })
+
+    function refreshChat() {
+        $("#chatbox").empty();
+    }
+
+    function sending() {
+        let temp;
+        if (flag1 === 0) {
+            if (answer.length === 1) {
+                let match = findMatches(answer[0], disease);
+                for (let i = 0; i < match.length; i++) {
+                    let que = i + ") " + match[i];
+                    temp = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>" + que + "</p> </li><br>";
+                    $("#chatbox").append(temp);
+                }
+                if(match.length === 0){
+                    temp = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>Sorry, I don't have any information about this disease. Please try again with another symptom.</p> </li><br>";
+                    $("#chatbox").append(temp);
+                    answer.shift();
+                    question.shift();
+                    return;
+
+                }
+                else {
+                    let ques = "Select the one you meant (0 - " + ((match.length) - 1) + ")";
+                    temp = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>" + ques + "</p> </li><br>";
+                 }
+            }
+            else {
+                temp = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>" + question[0] + "</p> </li><br>";
+            }
+            $("#chatbox").append(temp);
+            if (question.length === 0) {
+                flag = 1;
+                flag1 = 1;
+            }
+            question.shift();
+        }
+     }
+
+     function sending() {
+    if (flag1 === 0) {
+        if (answer.length === 1) {
+            let match = findMatches(answer[0], disease);
+            if (match.length === 0) {
+                let temp = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>Sorry, I don't have any information about this disease. Please try again with another symptom.</p> </li><br>";
+                $("#chatbox").append(temp);
+                answer.shift();
+                question.shift();
+            } else {
+                let temp = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>Select the one you meant (0 - " + ((match.length) - 1) + ")</p> </li><br>";
+                $("#chatbox").append(temp);
+            }
+        } else {
+            let temp = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>" + question[0] + "</p> </li><br>";
+            $("#chatbox").append(temp);
+        }
+        if (question.length === 0) {
+            flag = 1;
+            flag1 = 1;
+        }
+        question.shift();
+    }
+}
+
+
+
+
+</script>
+<script>
+    let question = ["Enter the symptom you are experiencing", "Select the one you meant (0 - 1)", "Okay. From how many days ?"];
+    let answer = [];
+    let flag1 = 0;
+    temp = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>" + question[0] + "</p> </li><br>";
+    const disease = ['abdominal_pain', 'abnormal_menstruation', 'acidity', 'acute_liver_failure', 'altered_sensorium', 'anxiety',
+        'back_pain', 'belly_pain', 'blackheads', 'bladder_discomfort', 'blister', 'blood_in_sputum', 'bloody_stool',
+        'blurred_and_distorted_vision', 'breathlessness', 'brittle_nails', 'bruising', 'burning_micturition', 'chest_pain',
+        'chills', 'cold_hands_and_feets', 'coma', 'congestion', 'constipation', 'continuous_feel_of_urine', 'continuous_sneezing',
+        'cough', 'cramps', 'dark_urine', 'dehydration', 'depression', 'diarrhoea', 'dischromic _patches', 'distention_of_abdomen',
+        'dizziness', 'drying_and_tingling_lips', 'enlarged_thyroid', 'excessive_hunger', 'extra_marital_contacts', 'family_history',
+        'fast_heart_rate', 'fatigue', 'fluid_overload', 'fluid_overload.1', 'foul_smell_of urine', 'headache', 'high_fever', 'hip_joint_pain',
+        'history_of_alcohol_consumption', 'increased_appetite', 'indigestion', 'inflammatory_nails', 'internal_itching',
+        'irregular_sugar_level', 'irritability', 'irritation_in_anus', 'itching', 'joint_pain', 'knee_pain', 'lack_of_concentration',
+        'lethargy', 'loss_of_appetite', 'loss_of_balance', 'loss_of_smell', 'malaise', 'mild_fever', 'mood_swings', 'movement_stiffness',
+        'mucoid_sputum', 'muscle_pain', 'muscle_wasting', 'muscle_weakness', 'nausea', 'neck_pain', 'nodal_skin_eruptions', 'obesity',
+        'pain_behind_the_eyes', 'pain_during_bowel_movements', 'pain_in_anal_region', 'painful_walking', 'palpitations', 'passage_of_gases',
+        'patches_in_throat', 'phlegm', 'polyuria', 'prominent_veins_on_calf', 'puffy_face_and_eyes', 'pus_filled_pimples',
+        'receiving_blood_transfusion', 'receiving_unsterile_injections', 'red_sore_around_nose', 'red_spots_over_body', 'redness_of_eyes', 'restlessness', 'runny_nose',
+        'rusty_sputum', 'scurring', 'shivering', 'silver_like_dusting', 'sinus_pressure', 'skin_peeling', 'skin_rash', 'slurred_speech', 'small_dents_in_nails',
+        'spinning_movements', 'spotting_ urination', 'stiff_neck', 'stomach_bleeding', 'stomach_pain', 'sunken_eyes', 'sweating', 'swelled_lymph_nodes', 'swelling_joints',
+        'swelling_of_stomach', 'swollen_blood_vessels', 'swollen_extremeties', 'swollen_legs', 'throat_irritation', 'toxic_look_(typhos)', 'ulcers_on_tongue', 'unsteadiness',
+        'visual_disturbances', 'vomiting', 'watering_from_eyes', 'weakness_in_limbs', 'weakness_of_one_body_side', 'weight_gain', 'weight_loss', 'yellow_crust_ooze',
+        'yellow_urine', 'yellowing_of_eyes', 'yellowish_skin'];
+
+    function findMatches(input, disease) {
+        if (!Array.isArray(disease)) {
+            return [];
+        }
+        const sanitizedInput = input.replace(/\s+/g, '_');
+        const regex = new RegExp(sanitizedInput, 'i'); // 'i' flag makes it case-insensitive
+        const matches = disease.filter(str => regex.test(str));
+        return matches;
+    }
+
+
+</script>
+<script>
+    let symptom = [];
+    let predicted_disease, description, precaution;
+    let res = 0;
+    let responses = [];
+
+    function scrollToBottom() {
+        const chatbox = document.getElementById("chatbox");
+        chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    function putSymptoms() {
+        if (symptom.length === 0) {
+            let ctr = 0;
+            for (let i = 0; i < responses.length; i++) {
+                if (responses[i] === 'no') {
+                    ctr++;
+                }
+            }
+            if (ctr >= 2) {
+                const temp = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>It might not be that bad but you should take necessary precautions</p> </li><br>";
+                $("#chatbox").append(temp);
+                const temp2 = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>Take following measures : " + precaution + "</p> </li><br>";
+                $("#chatbox").append(temp2);
+                res = 0;
+                return;
+            }
+            const temp = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>You may have " + predicted_disease + "</p> </li><br>";
+            $("#chatbox").append(temp);
+            const temp1 = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>" + description + "</p> </li><br>";
+            $("#chatbox").append(temp1);
+            const temp2 = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>Take following measures : " + precaution + "</p> </li><br>";
+            $("#chatbox").append(temp2);
+            res = 0;
+            return;
+        }
+        const temp = "<li class='chat incoming'> <span class='material-symbols-outlined'>smart_toy</span> <p>Are you facing " + symptom[0] + "</p> </li><br>";
+        $("#chatbox").append(temp);
+        symptom.shift();
+        res = 1;
+        scrollToBottom();
+    }
+
+    function send_message1() {
+        console.log("working");
+    }
+
+    function send_message() {
+        if (res === 1) {
+            let message = document.getElementById("text_context").value.trim();
+            temp = "<li class='chat outgoing' style='margin-left: 73%'> <p>" + message + "</p> <span class='material-symbols-outlined'>face</span> </li><br>";
+            $("#chatbox").append(temp);
+            responses.push(message);
+            putSymptoms();
+            return;
+        }
+        let message = document.getElementById("text_context").value;
+        var temp;
+        if (flag === 1) {
+            $.ajax({
+                type: 'POST',
+                url: 'send_message',
+                data: {
+                    message: message,
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                },
+                success: function (data) {
+                    console.log("success");
+                }
+            });
+            document.getElementById("text_context").value = "";
+        } else {
+            temp = "<li class='chat outgoing' style='margin-left: 73%'> <p>" + message + "</p> <span class='material-symbols-outlined'>face</span> </li><br>";
+            answer.push(message);
+            if (answer.length === 3) {
+                $.ajax({
+                    type: 'POST',
+                    url: 'send_answers',
+                    data: {
+                        message_0: answer[0],
+                        message_1: answer[1],
+                        message_2: answer[2],
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    },
+                    success: function (data) {
+                        for (let key in data.symptoms_given) {
+                            symptom.push(data.symptoms_given[key]);
+                        }
+                        predicted_disease = data.present_disease;
+                        description = data.description;
+                        precaution = data.precaution;
+                        putSymptoms();
+                    }
+                });
+
+                flag1 = 1;
+                flag = 1;
+            }
+            $("#chatbox").append(temp);
+            sending();
+        }
+        document.getElementById("text_context").value = "";
+        scrollToBottom();
+    }
+    document.getElementById("text_context").addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            send_message(); // Use the correct function name here
+            event.preventDefault(); // Prevent the default Enter key behavior
+        }
+    });
+    function toggleRefreshButton() {
+    const textArea = document.getElementById("text_context");
+    const refreshButton = document.getElementById("refresh-btn");
+
+    if (textArea.value.trim() !== "") {
+        refreshButton.style.display = "inline-block";
+    } else {
+        refreshButton.style.display = "none";
+    }
+}
+</script>
+</html>

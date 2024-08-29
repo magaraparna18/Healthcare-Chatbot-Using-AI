@@ -1,0 +1,173 @@
+{% extends 'Medilab/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+
+    .room {
+  margin: 0 auto;
+  max-width: 800px;
+  padding: 0 20px;
+  background: linear-gradient(to bottom, #749BC2, #4682A9);
+}
+
+.live-chat {
+  background: linear-gradient(to bottom, #749BC2, #4682A9);
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.darker {
+  border-color: #ccc;
+  background-color: #F6F4EB;
+    border-radius: 5px;
+}
+
+.live-chat::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.live-chat img {
+  float: left;
+  max-width: 60px;
+  width: 100%;
+  margin-right: 20px;
+  border-radius: 50%;
+}
+
+.live-chat img.right {
+  float: right;
+  margin-left: 20px;
+  margin-right:0;
+}
+
+.time-right {
+  float: right;
+  color: #F6F4EB;
+}
+
+.time-left {
+  float: left;
+  color: #999;
+}
+</style>
+<script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+
+    <div class="room">
+<div class="heading" >
+<h2 style="display: flex;justify-content: center;align-items: center"><strong>Welcome To Live Chat with Doctors</h2>
+    <br>
+<h3 style="display: flex;justify-content: center;align-items: center">{{room}} - Room code </h3>
+</div>
+<div id="display">
+
+<!-- <div class="container darker">
+  <b>Tom</b><p>Hello Everyone, How Are You Guys Doing?</p>
+  <span class="time-left">20th, April 2021</span>
+</div> -->
+
+</div>
+
+<script>
+$(document).ready(function(){
+
+setInterval(function(){
+    $.ajax({
+        type: 'GET',
+        url : "/getValue/{{room}}/",
+        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+        success: function(response){
+            console.log(response);
+            $("#display").empty();
+            for (var key in response.result)
+            {
+                var temp="<div class='container darker' style='font-weight: bold'><b>"+response.result[key].user+"</b><p class='message' style='font-weight: initial'>"+response.result[key].values+"</p></div>";
+                $("#display").append(temp);
+            }
+        },
+        error: function(response){
+            alert('An error occured')
+        }
+    });
+},1000);
+})
+</script>
+
+
+<div class="live-chat">
+    <style>
+    input[type=text], select {
+     font-family: "Poppins", sans-serif;
+     width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    background-color: #F6F4EB;
+    }
+
+    input[type=submit] {
+     font-family: "Poppins", sans-serif;
+        width: 100%;
+    background-color: #1D5D9B;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    }
+
+    input[type=submit]:hover {
+    background-color: #DFF6FF;
+            color: black;
+    }
+
+    .room {
+    border-radius: 5px;
+    background-color: white;
+    padding: 20px;
+        margin-top:350px;
+        margin-bottom:100px;
+    }
+    </style>
+
+    <form id="post-form">
+        {% csrf_token %}
+        <input type="hidden" name="username" id="username" value="{{username}}"/>
+        <input type="hidden" name="room_id" id="room_id" value="{{room_details.name}}"/>
+        <input type="text" name="values" id="values" width="100px" />
+        <input type="submit" value="Send">
+    </form>
+</div>
+
+    </div>
+
+
+<script type="text/javascript">
+  $(document).on('submit','#post-form',function(e){
+    e.preventDefault();
+
+    $.ajax({
+      type:'POST',
+      url:'/send',
+      data:{
+          username:$('#username').val(),
+          room_id:$('#room_id').val(),
+          values:$('#values').val(),
+        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+      },
+      success: function(data){
+         //alert(data)
+      }
+    });
+    document.getElementById('values').value = ''
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'Medilab/base.html' %}
+{% load static %}
+
+{% block content %}
+    <div class="container">
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <h1>Age Calculator</h1>
+        <div class="input-container">
+            <label for="birthDate">Date of Birth:</label>
+            <input type="date" id="birthDate" required>
+        </div>
+        <button onclick="calculateAge()">Calculate Age</button>
+        <div id="result"></div>
+        <br>
+        <br>
+    </div>
+    <style>
+        h1 {
+            color: #1977cc;
+        }
+
+        .input-container {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #1977cc;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #1977cc;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #155d8b;
+        }
+    </style>
+    
+    <script>
+        function calculateAge() {
+            const birthDate = new Date(document.getElementById("birthDate").value);
+            const today = new Date();
+
+            if (!isNaN(birthDate.getTime())) {
+                const age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+
+                const resultElement = document.getElementById("result");
+                resultElement.innerHTML = `Your age is: ${age} years`;
+            } else {
+                alert("Please enter a valid date of birth.");
+            }
+        }
+    </script>
+{% endblock %}
